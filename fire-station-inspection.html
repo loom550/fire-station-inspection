@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Fire Station Safety Inspection — The Loomex Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00A651;
+      --green-dark: #007a3d;
+      --green-light: #e8f5ee;
+      --navy: #1a3a5c;
+      --grey: #6D6E71;
+      --grey-light: #f2f4f2;
+      --border: #d4dfd4;
+      --text: #1e2822;
+      --text-muted: #5a6b5a;
+      --white: #ffffff;
+      --error: #c0392b;
+      --error-bg: #fdf0ee;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+      --radius: 8px;
+      --font: 'IBM Plex Sans', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--grey-light);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ─── PASSWORD GATE ─── */
+    #gate {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .gate-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .gate-logo {
+      display: inline-block;
+      background: var(--green);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+    .gate-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .gate-sub {
+      font-size: 13px;
+      color: var(--grey);
+      margin-bottom: 28px;
+    }
+    .gate-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: var(--font);
+      font-size: 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+    .gate-input:focus { border-color: var(--green); }
+    .gate-input.error { border-color: var(--error); }
+    .gate-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .gate-btn:hover { background: var(--green-dark); }
+    .gate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .gate-error {
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* ─── RESTORE BANNER ─── */
+    #restore-banner {
+      background: var(--navy);
+      color: var(--white);
+      text-align: center;
+      padding: 12px 20px;
+      font-size: 13px;
+      display: none;
+    }
+    #restore-banner button {
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0 4px;
+    }
+    #restore-banner .dismiss-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    #progress-bar-wrap {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 99px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .progress-label {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--grey);
+      white-space: nowrap;
+      min-width: 70px;
+      text-align: right;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      background: var(--green);
+      color: var(--white);
+      padding: 20px 20px 18px;
+    }
+    .header-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .header-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    /* ─── MAIN LAYOUT ─── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .card-header .section-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      opacity: 0.5;
+    }
+    .card-body { padding: 4px 0; }
+
+    /* ─── META CARD ─── */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 18px;
+    }
+    @media (max-width: 480px) {
+      .meta-grid { grid-template-columns: 1fr; }
+    }
+    .meta-grid .full-width { grid-column: 1 / -1; }
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .field-label .req { color: var(--error); }
+    .field-input {
+      width: 100%;
+      padding: 10px 13px;
+      font-family: var(--font);
+      font-size: 15px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--white);
+      -webkit-appearance: none;
+    }
+    .field-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0,166,81,0.12);
+    }
+    .field-input.invalid { border-color: var(--error); }
+
+    /* ─── CHECKLIST ROWS ─── */
+    .check-row {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--grey-light);
+      transition: background 0.15s;
+    }
+    .check-row:last-of-type { border-bottom: none; }
+    .check-row-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .check-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+      padding-top: 2px;
+      line-height: 1.45;
+    }
+    .yn-group {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .yn-btn {
+      padding: 5px 10px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+      background: var(--white);
+      color: var(--grey);
+      transition: all 0.15s;
+      min-width: 38px;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .yn-btn:hover { border-color: var(--green); color: var(--green); }
+    .yn-btn.active-y {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--white);
+    }
+    .yn-btn.active-n {
+      background: #e74c3c;
+      border-color: #c0392b;
+      color: var(--white);
+    }
+    .yn-btn.active-na {
+      background: #7f8c8d;
+      border-color: #636e72;
+      color: var(--white);
+    }
+    .comment-wrap {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.2s ease;
+      opacity: 0;
+      margin-top: 0;
+    }
+    .comment-wrap.open {
+      max-height: 200px;
+      opacity: 1;
+      margin-top: 10px;
+    }
+    .comment-input {
+      width: 100%;
+      padding: 9px 12px;
+      font-family: var(--font);
+      font-size: 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      resize: vertical;
+      min-height: 60px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--grey-light);
+    }
+    .comment-input:focus { border-color: var(--green); background: var(--white); }
+    .comment-input.required-empty { border-color: var(--error); }
+    .comment-hint {
+      font-size: 11px;
+      color: var(--grey);
+      margin-bottom: 5px;
+    }
+
+    /* ─── INTERNET SECTION ─── */
+    .connectivity-body { padding: 16px 18px; }
+    .connectivity-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .connectivity-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .conn-btn {
+      padding: 8px 18px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      background: var(--white);
+      color: var(--grey);
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .conn-btn.active {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green-dark);
+    }
+    .conn-comment { margin-top: 4px; }
+
+    /* ─── IMAGE UPLOAD ─── */
+    .image-section {
+      border-top: 1px dashed var(--border);
+      padding: 14px 18px;
+      background: #fafbfa;
+    }
+    .image-section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--grey);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--white);
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+    .upload-zone-text {
+      font-size: 13px;
+      color: var(--grey);
+    }
+    .upload-zone-text span {
+      color: var(--green);
+      font-weight: 600;
+    }
+    .upload-zone input[type="file"] { display: none; }
+    .image-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .thumb-item {
+      position: relative;
+      width: 72px; height: 72px;
+    }
+    .thumb-item img {
+      width: 72px; height: 72px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+    }
+    .thumb-remove {
+      position: absolute;
+      top: -5px; right: -5px;
+      width: 18px; height: 18px;
+      background: var(--error);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+      padding: 0;
+    }
+
+    /* ─── SIGNATURE ─── */
+    .sig-wrap {
+      padding: 18px;
+    }
+    .sig-instruction {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    #sig-canvas {
+      display: block;
+      width: 100%;
+      height: 140px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: crosshair;
+      touch-action: none;
+    }
+    #sig-canvas.invalid { border-color: var(--error); }
+    .sig-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .sig-clear {
+      font-family: var(--font);
+      font-size: 12px;
+      color: var(--grey);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    /* ─── SUBMIT ─── */
+    .submit-section {
+      padding: 8px 0 20px;
+    }
+    #submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    #submit-btn:hover:not(:disabled) { background: var(--green-dark); }
+    #submit-btn:active:not(:disabled) { transform: scale(0.99); }
+    #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--grey);
+      margin-top: 10px;
+    }
+    .validation-msg {
+      background: var(--error-bg);
+      border: 1px solid #f5c6c2;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--error);
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    /* ─── SUCCESS OVERLAY ─── */
+    #success-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--navy);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px;
+    }
+    .success-icon svg { width: 36px; height: 36px; }
+    #success-overlay h2 {
+      color: var(--white);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    #success-overlay p {
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      max-width: 340px;
+      line-height: 1.6;
+    }
+    .success-new {
+      margin-top: 28px;
+      padding: 12px 28px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ─── LOADING SPINNER ─── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: var(--grey);
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 480px) {
+      .check-label { font-size: 13px; }
+      .yn-btn { padding: 6px 8px; min-width: 34px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ PASSWORD GATE ═══ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">The Loomex Group</div>
+    <h1 class="gate-title">Fire Station Safety Inspection</h1>
+    <p class="gate-sub">Enter the access code to continue</p>
+    <input type="password" id="gate-pass" class="gate-input" placeholder="••••••••"
+           autocomplete="current-password" inputmode="text">
+    <button class="gate-btn" id="gate-btn">Continue</button>
+    <div class="gate-error" id="gate-error">Incorrect access code. Please try again.</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN FORM (hidden until authenticated) ═══ -->
+<div id="main-form" style="display:none">
+
+  <!-- Restore banner -->
+  <div id="restore-banner">
+    A saved draft was found from your last session.
+    <button onclick="restoreSave()">Restore Draft</button>
+    <button class="dismiss-btn" onclick="dismissRestore()">Dismiss</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div id="progress-bar-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label">0 / 0</div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="header-tag">The Loomex Group — Emergency Management</div>
+      <h1>Fire Station Facility Safety Inspection</h1>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- META CARD -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-header">
+        <h2>Inspection Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="meta-grid">
+          <div>
+            <label class="field-label" for="municipality">Municipality <span class="req">*</span></label>
+            <input class="field-input" id="municipality" type="text" placeholder="e.g. Kashechewan" autocomplete="off">
+          </div>
+          <div>
+            <label class="field-label" for="station-name">Fire Station Name <span class="req">*</span></label>
+            <input class="field-input" id="station-name" type="text" placeholder="e.g. Station 1" autocomplete="off">
+          </div>
+          <div>
+            <label class="field-label" for="insp-date">Inspection Date <span class="req">*</span></label>
+            <input class="field-input" id="insp-date" type="date">
+          </div>
+          <div>
+            <label class="field-label" for="inspector-name">Inspector Name <span class="req">*</span></label>
+            <input class="field-input" id="inspector-name" type="text" placeholder="Full name">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC CHECKLIST SECTIONS (rendered by JS) -->
+    <div id="sections-container"></div>
+
+    <!-- SIGNATURE CARD -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Inspector Signature</h2>
+      </div>
+      <div class="sig-wrap">
+        <p class="sig-instruction">Sign below using your finger or mouse to certify this inspection is accurate and complete.</p>
+        <canvas id="sig-canvas"></canvas>
+        <div class="sig-actions">
+          <button class="sig-clear" id="sig-clear">Clear Signature</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-section">
+      <div class="validation-msg" id="validation-msg"></div>
+      <button id="submit-btn">Submit Inspection</button>
+      <p class="submit-hint">Submitting will generate an Excel report and Word/PDF document saved to SharePoint.</p>
+    </div>
+
+  </main>
+
+  <footer>THE LOOMEX GROUP &nbsp;|&nbsp; FIRE STATION SAFETY INSPECTION &nbsp;|&nbsp; CONFIDENTIAL</footer>
+</div>
+
+<!-- ═══ SUCCESS OVERLAY ═══ -->
+<div id="success-overlay">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  </div>
+  <h2>Inspection Submitted</h2>
+  <p id="success-msg">Your inspection has been received and is being processed. Reports will be available in SharePoint shortly.</p>
+  <button class="success-new" onclick="startNew()">Start New Inspection</button>
+</div>
+
+<!-- Signature Pad library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION — update these before deploying
+// ═══════════════════════════════════════════════════════════
+const WORKER_URL = 'https://fire-inspection.loomex-it.workers.dev'; // e.g. https://your-worker.workers.dev
+
+// ═══════════════════════════════════════════════════════════
+// CHECKLIST DATA
+// ═══════════════════════════════════════════════════════════
+const CHECKLIST = [
+  {
+    id: 'structural',
+    title: 'Structural Inspection',
+    items: [
+      'Building use (EOC, public meetings)',
+      'Building condition (age, materials)',
+      'Meets current OBC — post disaster',
+      'Sufficient parking for staff',
+      'Outdoor lighting',
+      'Building security (key fob/card access, cameras)',
+      'Water and wastewater services',
+      'On-site water supply for apparatus',
+      'Sufficient room and access in bays for apparatus and personnel',
+      'Adequate parking for staff and firefighters',
+    ]
+  },
+  {
+    id: 'internet',
+    title: 'Internet Connectivity',
+    type: 'connectivity',
+    options: ['Fiber', 'Broadband', 'Satellite'],
+  },
+  {
+    id: 'electrical',
+    title: 'Electrical',
+    items: [
+      'Electrical outlets and switches — cover plates installed',
+      'Sufficient receptacles',
+      'Receptacles in kitchens and wet locations have GFI',
+      'Extension cords not used for permanent wiring',
+      'Circuit panels labeled',
+      'Circuit panels and boxes — unused openings are covered',
+      'Circuit panels — access to panels is kept clear',
+    ]
+  },
+  {
+    id: 'fire_pole',
+    title: 'Fire Pole or Slide (Where Applicable)',
+    items: [
+      'Second floor openings are secured by covers or guardrails and gate',
+      'Second floor opening secured to prevent diesel exhaust from entering second floor building areas',
+    ]
+  },
+  {
+    id: 'fire_prevention',
+    title: 'Fire Prevention',
+    items: [
+      'Fire extinguishers — monthly checks conducted',
+      'Fire extinguishers — annual maintenance check',
+      'Sprinkler heads — annual maintenance check (if applicable)',
+      'Emergency lighting and exit signs — monthly checks conducted',
+      'Commercial kitchen hood suppression system (if applicable)',
+    ]
+  },
+  {
+    id: 'hazardous',
+    title: 'Hazardous Chemicals (Custodial, Vehicle Maintenance)',
+    items: [
+      'Containers are labeled',
+      'Safety Data Sheet available for each product',
+      'Eyewash provided if chemical products are corrosive',
+      'Stored in labelled storeroom or cabinet',
+    ]
+  },
+  {
+    id: 'scba',
+    title: 'SCBA Fill Station',
+    items: [
+      'Cascade cylinders kept secured',
+      'Quarterly inspection (NFPA 1989)',
+    ]
+  },
+  {
+    id: 'ladders',
+    title: 'Ladders',
+    items: [
+      'Ladders for use in facility are properly inspected before use',
+    ]
+  },
+  {
+    id: 'apparatus',
+    title: 'Apparatus',
+    items: [
+      'Apparatus area is sufficiently ventilated to prevent build-up of exhaust (general or local ventilation)',
+      'Ventilation filters are maintained and replaced (if filters are used)',
+      'Fuel dispensing meets TSSA (if applicable)',
+    ]
+  },
+  {
+    id: 'housekeeping',
+    title: 'Housekeeping',
+    items: [
+      'Training/meeting room, kitchen, showers, washrooms, sleeping area',
+      'Apparatus bays',
+      'Storage rooms',
+      'Health and Safety board',
+    ]
+  },
+  {
+    id: 'material_storage',
+    title: 'Material Storage',
+    items: [
+      'Storage mezzanines — weight limit is posted',
+      'Mezzanines — railing if more than 4 feet above next level',
+      'Shelves are secured to prevent tipping',
+      'Shelves — item height is at least 18 inches below sprinkler heads',
+    ]
+  },
+  {
+    id: 'ppe',
+    title: 'Personal Protective Equipment (PPE)',
+    items: [
+      'PPE stored away from administrative, living and sleeping areas',
+      'Extractor or third-party contract for cleaning',
+      'PPE decontamination — cleaning station with drying facility',
+    ]
+  },
+  {
+    id: 'generator',
+    title: 'Emergency Generator (If Applicable)',
+    items: [
+      'Weekly inspection (fluid leaks, battery health)',
+      'Monthly testing for 30 minutes',
+    ]
+  },
+  {
+    id: 'slip_trip',
+    title: 'Slip and Trip Prevention',
+    items: [
+      'Apparatus floors maintained as dry as feasible (floor drains)',
+      'Stairs have handrails and railings, treads in good condition',
+    ]
+  },
+  {
+    id: 'tools',
+    title: 'Tools and Equipment',
+    items: [
+      'Power tools inspected before use',
+      'Power tools — electrical cords are 3-prong or double insulated',
+      "Snowblowers, lawnmowers, and other equipment operated according to owner's manual",
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let sessionToken = null;
+let signaturePad = null;
+// formState holds all form data for localStorage auto-save
+let formState = {
+  savedAt: null,
+  meta: { municipality: '', station_name: '', date: '', inspector_name: '' },
+  sections: {}
+};
+
+// Images are stored in memory only (too large for localStorage)
+// imageStore[sectionId] = [ { name, dataUrl, type } ]
+let imageStore = {};
+
+// ═══════════════════════════════════════════════════════════
+// PASSWORD GATE
+// ═══════════════════════════════════════════════════════════
+document.getElementById('gate-btn').addEventListener('click', authenticate);
+document.getElementById('gate-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') authenticate();
+  document.getElementById('gate-pass').classList.remove('error');
+  document.getElementById('gate-error').style.display = 'none';
+});
+
+async function authenticate() {
+  const pass = document.getElementById('gate-pass').value.trim();
+  if (!pass) return;
+
+  const btn = document.getElementById('gate-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verifying...';
+
+  try {
+    const res = await fetch(WORKER_URL + '/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      sessionToken = data.token;
+      document.getElementById('gate').style.display = 'none';
+      initForm();
+    } else {
+      document.getElementById('gate-pass').classList.add('error');
+      document.getElementById('gate-error').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Continue';
+    }
+  } catch (err) {
+    document.getElementById('gate-error').textContent = 'Connection error. Please check your internet and try again.';
+    document.getElementById('gate-error').style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Continue';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORM INITIALIZATION
+// ═══════════════════════════════════════════════════════════
+function initForm() {
+  document.getElementById('main-form').style.display = 'block';
+
+  // Set today's date as default
+  document.getElementById('insp-date').value = new Date().toISOString().slice(0, 10);
+
+  // Check for saved draft
+  checkForSavedDraft();
+
+  // Render sections
+  renderSections();
+
+  // Init signature pad
+  initSignaturePad();
+
+  // Meta field listeners for auto-save
+  ['municipality', 'station-name', 'insp-date', 'inspector-name'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      saveToLocal();
+      updateProgress();
+    });
+  });
+
+  // Submit
+  document.getElementById('submit-btn').addEventListener('click', handleSubmit);
+
+  updateProgress();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SECTION RENDERING
+// ═══════════════════════════════════════════════════════════
+function renderSections() {
+  const container = document.getElementById('sections-container');
+  CHECKLIST.forEach((section, sIdx) => {
+    // Initialize state
+    if (!formState.sections[section.id]) {
+      formState.sections[section.id] = { items: {}, connectivity: {}, comment: '' };
+    }
+    imageStore[section.id] = [];
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'section-' + section.id;
+
+    // Header
+    card.innerHTML = `
+      <div class="card-header">
+        <h2>${section.title}</h2>
+        <span class="section-badge">${sIdx + 1} / ${CHECKLIST.length}</span>
+      </div>
+      <div class="card-body" id="body-${section.id}"></div>
+      ${buildImageSection(section.id)}
+    `;
+
+    container.appendChild(card);
+
+    const body = document.getElementById('body-' + section.id);
+
+    if (section.type === 'connectivity') {
+      renderConnectivitySection(body, section);
+    } else {
+      renderChecklistRows(body, section);
+    }
+
+    // Wire up image upload
+    wireImageUpload(section.id);
+  });
+}
+
+function renderChecklistRows(container, section) {
+  section.items.forEach((itemLabel, idx) => {
+    const itemId = section.id + '_' + idx;
+    const row = document.createElement('div');
+    row.className = 'check-row';
+    row.innerHTML = `
+      <div class="check-row-top">
+        <span class="check-label">${itemLabel}</span>
+        <div class="yn-group">
+          <button class="yn-btn" data-item="${itemId}" data-val="Y">Y</button>
+          <button class="yn-btn" data-item="${itemId}" data-val="N">N</button>
+          <button class="yn-btn" data-item="${itemId}" data-val="NA">N/A</button>
+        </div>
+      </div>
+      <div class="comment-wrap" id="comment-wrap-${itemId}">
+        <p class="comment-hint">Comment required — please explain:</p>
+        <textarea class="comment-input" id="comment-${itemId}" placeholder="Add notes or recommendation..." rows="2"></textarea>
+      </div>
+    `;
+    container.appendChild(row);
+
+    // Wire Y/N/NA buttons
+    row.querySelectorAll('.yn-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.val;
+        const item = btn.dataset.item;
+        setYNA(item, val, row);
+        saveToLocal();
+        updateProgress();
+      });
+    });
+
+    // Wire comment save
+    document.getElementById('comment-' + itemId).addEventListener('input', () => saveToLocal());
+  });
+}
+
+function renderConnectivitySection(container, section) {
+  const div = document.createElement('div');
+  div.className = 'connectivity-body';
+  div.innerHTML = `
+    <p class="connectivity-label">Select all connectivity types available at this facility:</p>
+    <div class="connectivity-options" id="conn-opts-${section.id}">
+      ${section.options.map(opt => `
+        <button class="conn-btn" data-section="${section.id}" data-opt="${opt}">${opt}</button>
+      `).join('')}
+    </div>
+    <div class="conn-comment">
+      <p class="comment-hint">Notes (optional):</p>
+      <textarea class="comment-input" id="conn-comment-${section.id}" placeholder="Additional connectivity notes..." rows="2"></textarea>
+    </div>
+  `;
+  container.appendChild(div);
+
+  // Wire toggle buttons
+  div.querySelectorAll('.conn-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      if (!formState.sections[section.id].connectivity) {
+        formState.sections[section.id].connectivity = {};
+      }
+      formState.sections[section.id].connectivity[btn.dataset.opt] = btn.classList.contains('active');
+      saveToLocal();
+      updateProgress();
+    });
+  });
+
+  document.getElementById('conn-comment-' + section.id).addEventListener('input', () => saveToLocal());
+}
+
+function buildImageSection(sectionId) {
+  return `
+    <div class="image-section">
+      <div class="image-section-label">Photos for this section (optional)</div>
+      <div class="upload-zone" id="upload-zone-${sectionId}">
+        <input type="file" id="upload-input-${sectionId}" accept="image/*" multiple>
+        <div class="upload-zone-text">
+          <span>Tap to upload photos</span> or drag and drop<br>
+          <span style="font-size:11px;color:var(--grey);">JPG, PNG, HEIC — max 10MB each</span>
+        </div>
+      </div>
+      <div class="image-thumbs" id="thumbs-${sectionId}"></div>
+    </div>
+  `;
+}
+
+function wireImageUpload(sectionId) {
+  const zone = document.getElementById('upload-zone-' + sectionId);
+  const input = document.getElementById('upload-input-' + sectionId);
+
+  zone.addEventListener('click', () => input.click());
+  input.addEventListener('change', e => handleFiles(e.target.files, sectionId));
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files, sectionId);
+  });
+}
+
+function handleFiles(files, sectionId) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert(`${file.name} is larger than 10MB and was skipped.`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = { name: file.name, dataUrl: e.target.result, type: file.type };
+      imageStore[sectionId].push(img);
+      renderThumb(sectionId, imageStore[sectionId].length - 1);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderThumb(sectionId, idx) {
+  const thumbsContainer = document.getElementById('thumbs-' + sectionId);
+  const img = imageStore[sectionId][idx];
+  const item = document.createElement('div');
+  item.className = 'thumb-item';
+  item.id = 'thumb-' + sectionId + '-' + idx;
+  item.innerHTML = `
+    <img src="${img.dataUrl}" alt="Photo ${idx+1}">
+    <button class="thumb-remove" onclick="removeThumb('${sectionId}', ${idx})">&times;</button>
+  `;
+  thumbsContainer.appendChild(item);
+}
+
+function removeThumb(sectionId, idx) {
+  imageStore[sectionId][idx] = null; // mark as removed
+  const el = document.getElementById('thumb-' + sectionId + '-' + idx);
+  if (el) el.remove();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Y/N/NA LOGIC
+// ═══════════════════════════════════════════════════════════
+function setYNA(itemId, val, row) {
+  // Update buttons
+  row.querySelectorAll('.yn-btn').forEach(btn => {
+    btn.classList.remove('active-y', 'active-n', 'active-na');
+    if (btn.dataset.val === val) {
+      btn.classList.add(val === 'Y' ? 'active-y' : val === 'N' ? 'active-n' : 'active-na');
+    }
+  });
+
+  // Show/hide comment
+  const commentWrap = document.getElementById('comment-wrap-' + itemId);
+  if (val === 'N' || val === 'NA') {
+    commentWrap.classList.add('open');
+  } else {
+    commentWrap.classList.remove('open');
+  }
+
+  // Store in state
+  const [sectionId, ...rest] = itemId.split('_');
+  const idx = rest.join('_');
+  if (!formState.sections[sectionId]) formState.sections[sectionId] = { items: {} };
+  if (!formState.sections[sectionId].items) formState.sections[sectionId].items = {};
+  formState.sections[sectionId].items[itemId] = {
+    value: val,
+    comment: document.getElementById('comment-' + itemId)?.value || ''
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIGNATURE PAD
+// ═══════════════════════════════════════════════════════════
+function initSignaturePad() {
+  const canvas = document.getElementById('sig-canvas');
+  signaturePad = new SignaturePad(canvas, {
+    backgroundColor: 'rgb(255,255,255)',
+    penColor: '#1a3a5c',
+    minWidth: 0.5,
+    maxWidth: 2.5
+  });
+
+  // Resize canvas properly
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    canvas.getContext('2d').scale(ratio, ratio);
+    signaturePad.clear();
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  document.getElementById('sig-clear').addEventListener('click', () => {
+    signaturePad.clear();
+    canvas.classList.remove('invalid');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROGRESS TRACKING
+// ═══════════════════════════════════════════════════════════
+function updateProgress() {
+  let total = 0;
+  let answered = 0;
+
+  CHECKLIST.forEach(section => {
+    if (section.type === 'connectivity') {
+      // Count connectivity section as 1 item
+      total += 1;
+      const opts = formState.sections[section.id]?.connectivity || {};
+      if (Object.values(opts).some(v => v)) answered += 1;
+    } else {
+      total += section.items.length;
+      section.items.forEach((_, idx) => {
+        const itemId = section.id + '_' + idx;
+        if (formState.sections[section.id]?.items?.[itemId]?.value) answered += 1;
+      });
+    }
+  });
+
+  const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = answered + ' / ' + total;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOCAL STORAGE AUTO-SAVE
+// ═══════════════════════════════════════════════════════════
+function saveToLocal() {
+  try {
+    // Collect current meta values
+    formState.meta.municipality = document.getElementById('municipality').value;
+    formState.meta.station_name = document.getElementById('station-name').value;
+    formState.meta.date = document.getElementById('insp-date').value;
+    formState.meta.inspector_name = document.getElementById('inspector-name').value;
+
+    // Collect current item states from DOM (comment fields)
+    CHECKLIST.forEach(section => {
+      if (!formState.sections[section.id]) formState.sections[section.id] = { items: {} };
+      if (section.type === 'connectivity') {
+        const commentEl = document.getElementById('conn-comment-' + section.id);
+        if (commentEl) formState.sections[section.id].comment = commentEl.value;
+      } else {
+        section.items.forEach((_, idx) => {
+          const itemId = section.id + '_' + idx;
+          if (!formState.sections[section.id].items) formState.sections[section.id].items = {};
+          if (!formState.sections[section.id].items[itemId]) {
+            formState.sections[section.id].items[itemId] = { value: null, comment: '' };
+          }
+          const commentEl = document.getElementById('comment-' + itemId);
+          if (commentEl) formState.sections[section.id].items[itemId].comment = commentEl.value;
+        });
+      }
+    });
+
+    formState.savedAt = Date.now();
+    localStorage.setItem('loomex_inspection_draft', JSON.stringify(formState));
+  } catch (e) {
+    // localStorage might be full or unavailable — fail silently
+  }
+}
+
+function checkForSavedDraft() {
+  try {
+    const saved = localStorage.getItem('loomex_inspection_draft');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    if (!parsed.savedAt) return;
+
+    // Only offer restore if less than 24 hours old
+    const age = Date.now() - parsed.savedAt;
+    if (age < 24 * 60 * 60 * 1000) {
+      document.getElementById('restore-banner').style.display = 'block';
+      window._savedDraft = parsed;
+    }
+  } catch (e) {}
+}
+
+function restoreSave() {
+  const draft = window._savedDraft;
+  if (!draft) return;
+
+  formState = draft;
+
+  // Restore meta fields
+  if (draft.meta) {
+    document.getElementById('municipality').value = draft.meta.municipality || '';
+    document.getElementById('station-name').value = draft.meta.station_name || '';
+    document.getElementById('insp-date').value = draft.meta.date || '';
+    document.getElementById('inspector-name').value = draft.meta.inspector_name || '';
+  }
+
+  // Restore section states
+  CHECKLIST.forEach(section => {
+    const sectionState = draft.sections?.[section.id];
+    if (!sectionState) return;
+
+    if (section.type === 'connectivity') {
+      const opts = sectionState.connectivity || {};
+      Object.entries(opts).forEach(([opt, val]) => {
+        if (val) {
+          const btn = document.querySelector(`.conn-btn[data-section="${section.id}"][data-opt="${opt}"]`);
+          if (btn) btn.classList.add('active');
+        }
+      });
+      const commentEl = document.getElementById('conn-comment-' + section.id);
+      if (commentEl && sectionState.comment) commentEl.value = sectionState.comment;
+    } else {
+      const items = sectionState.items || {};
+      section.items.forEach((_, idx) => {
+        const itemId = section.id + '_' + idx;
+        const itemState = items[itemId];
+        if (!itemState) return;
+
+        // Find the row and restore
+        const row = document.querySelector(`.yn-btn[data-item="${itemId}"]`)?.closest('.check-row');
+        if (row && itemState.value) {
+          setYNA(itemId, itemState.value, row);
+        }
+        const commentEl = document.getElementById('comment-' + itemId);
+        if (commentEl && itemState.comment) commentEl.value = itemState.comment;
+      });
+    }
+  });
+
+  dismissRestore();
+  updateProgress();
+}
+
+function dismissRestore() {
+  document.getElementById('restore-banner').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORM SUBMISSION
+// ═══════════════════════════════════════════════════════════
+async function handleSubmit() {
+  // Save state first
+  saveToLocal();
+
+  // Validate meta
+  const validationErrors = [];
+  const municipality = document.getElementById('municipality').value.trim();
+  const stationName = document.getElementById('station-name').value.trim();
+  const date = document.getElementById('insp-date').value;
+  const inspectorName = document.getElementById('inspector-name').value.trim();
+
+  if (!municipality) { validationErrors.push('Municipality is required.'); document.getElementById('municipality').classList.add('invalid'); }
+  else document.getElementById('municipality').classList.remove('invalid');
+
+  if (!stationName) { validationErrors.push('Fire Station Name is required.'); document.getElementById('station-name').classList.add('invalid'); }
+  else document.getElementById('station-name').classList.remove('invalid');
+
+  if (!date) { validationErrors.push('Inspection Date is required.'); document.getElementById('insp-date').classList.add('invalid'); }
+  else document.getElementById('insp-date').classList.remove('invalid');
+
+  if (!inspectorName) { validationErrors.push('Inspector Name is required.'); document.getElementById('inspector-name').classList.add('invalid'); }
+  else document.getElementById('inspector-name').classList.remove('invalid');
+
+  // Validate comments required where N or N/A
+  let missingComments = false;
+  CHECKLIST.forEach(section => {
+    if (section.type === 'connectivity') return;
+    section.items.forEach((_, idx) => {
+      const itemId = section.id + '_' + idx;
+      const itemState = formState.sections[section.id]?.items?.[itemId];
+      if (itemState?.value === 'N' || itemState?.value === 'NA') {
+        const commentEl = document.getElementById('comment-' + itemId);
+        if (!commentEl?.value?.trim()) {
+          commentEl.classList.add('required-empty');
+          missingComments = true;
+        } else {
+          commentEl.classList.remove('required-empty');
+        }
+      }
+    });
+  });
+  if (missingComments) validationErrors.push('All items marked N or N/A require a comment.');
+
+  // Validate signature
+  if (signaturePad.isEmpty()) {
+    validationErrors.push('Inspector signature is required.');
+    document.getElementById('sig-canvas').classList.add('invalid');
+  } else {
+    document.getElementById('sig-canvas').classList.remove('invalid');
+  }
+
+  if (validationErrors.length > 0) {
+    const msgEl = document.getElementById('validation-msg');
+    msgEl.innerHTML = '<strong>Please fix the following before submitting:</strong><br>' + validationErrors.join('<br>');
+    msgEl.style.display = 'block';
+    msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  document.getElementById('validation-msg').style.display = 'none';
+
+  // Build payload
+  const stationSlug = stationName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+
+  const sectionsPayload = {};
+  CHECKLIST.forEach(section => {
+    const sectionState = formState.sections[section.id] || {};
+
+    if (section.type === 'connectivity') {
+      sectionsPayload[section.id] = {
+        title: section.title,
+        type: 'connectivity',
+        selected: Object.entries(sectionState.connectivity || {})
+          .filter(([,v]) => v).map(([k]) => k),
+        comment: document.getElementById('conn-comment-' + section.id)?.value || '',
+        images: buildImagePayload(section.id, stationSlug)
+      };
+    } else {
+      const items = section.items.map((label, idx) => {
+        const itemId = section.id + '_' + idx;
+        const state = sectionState.items?.[itemId] || {};
+        return {
+          label,
+          value: state.value || '',
+          comment: document.getElementById('comment-' + itemId)?.value || ''
+        };
+      });
+
+      sectionsPayload[section.id] = {
+        title: section.title,
+        items,
+        images: buildImagePayload(section.id, stationSlug)
+      };
+    }
+  });
+
+  const payload = {
+    meta: {
+      municipality,
+      station_name: stationName,
+      date,
+      inspector_name: inspectorName,
+      signature: signaturePad.toDataURL('image/png'),
+      submitted_at: new Date().toISOString()
+    },
+    sections: sectionsPayload
+  };
+
+  // Submit
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
+
+  try {
+    const res = await fetch(WORKER_URL + '/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Session-Token': sessionToken
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      // Clear saved draft
+      try { localStorage.removeItem('loomex_inspection_draft'); } catch(e) {}
+
+      const successEl = document.getElementById('success-overlay');
+      successEl.style.display = 'flex';
+      document.getElementById('success-msg').textContent =
+        `Inspection for ${stationName} (${municipality}) has been submitted. Reports will be saved to SharePoint shortly.`;
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      alert('Submission failed: ' + (errData.error || 'Unknown error. Please try again.'));
+      btn.disabled = false;
+      btn.textContent = 'Submit Inspection';
+    }
+  } catch (err) {
+    alert('Connection error. Please check your internet and try again.');
+    btn.disabled = false;
+    btn.textContent = 'Submit Inspection';
+  }
+}
+
+function buildImagePayload(sectionId, stationSlug) {
+  return (imageStore[sectionId] || [])
+    .filter(img => img !== null)
+    .map((img, idx) => {
+      const ext = img.type.split('/')[1] || 'jpg';
+      const sectionSlug = sectionId.replace(/_/g, '-');
+      return {
+        filename: `${stationSlug}_${sectionSlug}_${idx + 1}.${ext}`,
+        data: img.dataUrl,
+        type: img.type
+      };
+    });
+}
+
+function startNew() {
+  location.reload();
+}
+</script>
+</body>
+</html>
